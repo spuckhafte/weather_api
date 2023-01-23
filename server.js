@@ -1,4 +1,3 @@
-// imports
 const express = require('express');
 const app = express()
 const axios = require("axios");
@@ -16,19 +15,25 @@ rc.on('error', (err) => console.error('Redis Error: ', err));
 // default data
 const cities = data.cities;
 const idealSize = 10;
-const CACHE_TIMING = 15; // min
+const CACHE_TIMING = 15; // minutes
 
 app.get('/', async (req, res) => {
   let page = req.query.page;
   let size = req.query.size;
   let city = req.query.city
-  let isRangeGiven = !(!page || !size);
-  let isCityGiven = !!city;
+  let isRangeGiven = !(!page || !size); // page details
+  let isCityGiven = !!city; // city details
 
+  // requested cities: subset of the 30 cities
   let reqCities = []
 
+  // if page details or no details are provided
+  // default page settings, if no details (page:0 size:10)
   if (isRangeGiven || !(isRangeGiven || isCityGiven)) {
+    
+    // for page details
     if (isRangeGiven) {
+      // handling all the errors
       if ((isNaN(page) || isNaN(size))) {
         error(`invalid_query`, res)
         return;
@@ -37,7 +42,7 @@ app.get('/', async (req, res) => {
       size = parseInt(size);
 
       if (size > idealSize) {
-        error(`ideal_page_size exceeded (${idealSize})`, res);
+        error(`ideal_page_size_exceeded (${idealSize})`, res);
         return;
       }
       if (page > (cities.length / idealSize)) {
@@ -46,12 +51,15 @@ app.get('/', async (req, res) => {
       }
     }
 
+    // if no error then simply calculate the starting and ending index of the cities
     const start = isRangeGiven ? page * idealSize : 0;
     const end = isRangeGiven ? start + size : idealSize - 1;
-    reqCities = cities.slice(start, end);
+    
+    reqCities = cities.slice(start, end); // slice off the requested cities
   }
 
-  else if (isCityGiven) {
+  // for city details
+  if (isCityGiven) {
     if (!cities.includes(city.toLowerCase())) {
       error('not_found', res);
       return;
@@ -60,7 +68,10 @@ app.get('/', async (req, res) => {
   }
 
   const weatherDataCollected = {};
+  
   for (let reqCity of reqCities) {
+    
+    // if city is not cached, fetch it (3rd party) and cache it for 15mins
     if (!(await rc.exists(reqCity))) {
       const data = (await axios.request(generateOptions(reqCity))).data;
       weatherDataCollected[reqCity] = {
@@ -72,15 +83,18 @@ app.get('/', async (req, res) => {
         weather_icon: `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`
       }
       rc.setEx(reqCity, CACHE_TIMING*60, JSON.stringify(weatherDataCollected[reqCity]));
-    } else {
+      
+    } else { // city is cached
       weatherDataCollected[reqCity] = JSON.parse(await rc.get(reqCity));
     }
   }
 
+  // send json response to client
   res.header("Access-Control-Allow-Origin", "*");
   res.status(200).json(weatherDataCollected);
 });
 
+// generate GET options for axios
 function generateOptions(city) {
   return {
     method: 'GET',
