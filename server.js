@@ -27,12 +27,13 @@ app.get('/', async (req, res) => {
   // requested cities: subset of the 30 cities
   let reqCities = []
 
-  // if page details or no details are provided
-  // default page settings, if no details (page:0 size:10)
+  // Exec this block if page details or no details are provided.
+  // Use default page settings when neither city nor page query is given (page:0 size:10).
   if (isRangeGiven || !(isRangeGiven || isCityGiven)) {
     
     // for page details
     if (isRangeGiven) {
+      
       // handling all the errors
       if ((isNaN(page) || isNaN(size))) {
         error(`invalid_query`, res)
