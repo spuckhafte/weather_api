@@ -28,20 +28,22 @@ app.get('/', async (req, res) => {
   let reqCities = []
 
   if (isRangeGiven || !(isRangeGiven || isCityGiven)) {
-    if ((isNaN(page) || isNaN(size))) {
-      error(`invalid_query`, res)
-      return;
-    }
-    page = parseInt(page);
-    size = parseInt(size);
+    if (isRangeGiven) {
+      if ((isNaN(page) || isNaN(size))) {
+        error(`invalid_query`, res)
+        return;
+      }
+      page = parseInt(page);
+      size = parseInt(size);
 
-    if (size > idealSize) {
-      error(`ideal_page_size exceeded (${idealSize})`, res);
-      return;
-    }
-    if (page > (cities.length / idealSize)) {
-      error(`page_limit_exceeded (${Math.ceil(cities.length / idealSize)-1})`, res);
-      return;
+      if (size > idealSize) {
+        error(`ideal_page_size exceeded (${idealSize})`, res);
+        return;
+      }
+      if (page > (cities.length / idealSize)) {
+        error(`page_limit_exceeded (${Math.ceil(cities.length / idealSize)-1})`, res);
+        return;
+      }
     }
 
     const start = isRangeGiven ? page * idealSize : 0;
