@@ -93,6 +93,21 @@ app.get('/', async (req, res) => {
   // send json response to client
   res.header("Access-Control-Allow-Origin", "*");
   res.status(200).json(weatherDataCollected);
+  res.end();
+});
+
+// get details of total_pages and ideal_size
+app.get('/config', (req, res) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.status(200).json({ end_page: Math.ceil(cities.length / idealSize) - 1, ideal_size: idealSize });
+  res.end();
+});
+
+// get all the cities in the db
+app.get('/cities', (req, res) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.status(200).json({ all_cities: [...cities] });
+  res.end();
 });
 
 // generate GET options for axios
