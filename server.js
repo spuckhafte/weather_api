@@ -75,15 +75,15 @@ app.get('/', async (req, res) => {
     // if city is not cached, fetch it (3rd party) and cache it for 15mins
     if (!(await rc.exists(reqCity))) {
       const data = (await axios.request(generateOptions(reqCity))).data;
-      weatherDataCollected[reqCity] = {
-        coord: data.coord,
-        temp: data.main.temp,
-        temp_max: data.main.temp_max,
-        temp_min: data.main.temp_min,
-        weather: data.weather[0].description,
-        weather_icon: `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`
-      }
+      weatherDataCollected[reqCity] = generateWeatherObject(data);
       rc.setEx(reqCity, CACHE_TIMING*60, JSON.stringify(weatherDataCollected[reqCity]));
+      
+      // this will make sure that it updates the cache before its expiration
+      setInterval(async () => {
+        const data = (await axios.request(generateOptions(reqCity))).data;
+        await rc.del(reqCity);
+        rc.setEx(reqCity, CACHE_TIMING*60, JSON.stringify(generateWeatherObject(data)));
+      }, (CACHE_TIMING - 1) * 60 * 1000)
       
     } else { // city is cached
       weatherDataCollected[reqCity] = JSON.parse(await rc.get(reqCity));
@@ -109,6 +109,17 @@ app.get('/cities', (req, res) => {
   res.status(200).json({ all_cities: [...cities] });
   res.end();
 });
+
+function generateWeatherObject(data) {
+  return {
+    coord: data.coord,
+    temp: data.main.temp,
+    temp_max: data.main.temp_max,
+    temp_min: data.main.temp_min,
+    weather: data.weather[0].description,
+    weather_icon: `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`
+  }
+}
 
 // generate GET options for axios
 function generateOptions(city) {
