@@ -46,7 +46,7 @@ app.get('/', async (req, res) => {
         error(`ideal_page_size_exceeded (${idealSize})`, res);
         return;
       }
-      if (page > (cities.length / idealSize)) {
+      if (page > (cities.length / idealSize) - 1) {
         error(`page_limit_exceeded (${Math.ceil(cities.length / idealSize)-1})`, res);
         return;
       }
