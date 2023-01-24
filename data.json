@@ -1,10 +1,9 @@
 {
     "cities": [
-        'thiruvananthapuram', 'dispur', 'patna', 'raipur', 'panaji', 
-        'gandhinagar', 'chandigarh', 'shimla', 'srinagar', 'ranchi', 
-        'bangalore', 'kozhikode', 'bhopal', 'mumbai', 'imphal', 'shillong', 
-        'aizawl', 'kohima', 'bhubaneswar', 'jaipur', 'gangtok', 'chennai', 
-        'agartala', 'lucknow', 'dehradun', 'kolkata', 'hyderabad', 
-        'amaravati', 'itanagar', 'surat'
-    ]
+        "thiruvananthapuram","dispur","patna","raipur","panaji",
+        "gandhinagar","chandigarh","shimla","srinagar","ranchi","bangalore",
+        "kozhikode","bhopal","mumbai","imphal","shillong","aizawl","kohima",
+        "bhubaneswar","jaipur","gangtok","chennai","agartala","lucknow","dehradun",
+        "kolkata","hyderabad","amaravati","itanagar","surat"
+   ]
 }
